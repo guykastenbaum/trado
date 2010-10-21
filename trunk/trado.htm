@@ -1,0 +1,116 @@
+
+<style>
+#filintxt{
+	width: 400px;
+	height:400px;
+/* float:left; */
+}
+#tradfile{
+/* float:left; */
+}
+textarea.tradichg{
+	width:400px;
+}
+#savefile{
+/* float:left; */
+	margin-top:300px;
+}
+#filouttxt{
+	width: 400px;
+	height:400px;
+/* float:left; */
+}
+button.bmi{
+	vertical-align:super;
+}
+</style>
+conf : {menu_config}
+dir. in  : <input id="dirin"   class="updatesession"  size="20" value="{dirin}"  /> 
+dir. out : <input id="dirout"  class="updatesession"  size="20" value="{dirout}" /> 
+<br/>
+file : {menu_filin}
+<br/>
+<br/><b>{filtrad}</b><br/>
+
+
+<!-- BEGIN trad -->
+<textarea id="tradin{i}"  class="tradichg" rows="{n}">{in_h}</textarea> : 
+<textarea id="tradout{i}" class="tradichg" rows="{n}">{out_h}</textarea>
+<button class="bmi" id="bm{i}">-</button><br/>
+<!-- END trad -->
+<button id=bok>OK</button>
+<button id=bp1>ADD+</button>
+<button id=bzp>DEL</button>
+<button id=brz>RESET</button>
+<br/>
+<span id="res"></span>
+<br/>
+<table border=0>
+	<tr><th>source master file : {filin}</th><th>=></th><th>online target file : {filin}</th></tr>
+	<tr>
+		<td><textarea id="filintxt">{filintxt_h}</textarea></td>
+		<td valign=top>
+	<button id="tradfile">TRAD</button><br/>
+	<button id="savefile">SAVE</button>
+	<button id="checkfile">CHECK</button>
+		</td>
+		<td><textarea id="filouttxt">{filouttxt_h}</textarea></td>
+	</tr>
+</table>
+<br/>
+<br/>
+<button id=cretrds>reset/create ALL translations</button>
+<button id=cretxts>translate ALL</button>
+<button id=chktxts>check ALL</button>
+<br/>
+<br/>
+<a href="?reload=1">reload configuration</a><br/>
+<script>
+
+$(function(){
+
+$('.updatesession').change(function(){
+	$("#res").load("{pagedir}",{action:'updatesession',key:$(this).attr('id').replace(/menu_/,''),val:$(this).val()},
+	function(){window.location.reload()})});
+$('.updateconfig').change(function(){
+	$("#res").load("{pagedir}",{action:'updateconfig',config:$(this).val()},
+	function(){window.location.reload()})});
+$('#bok').click(function(){$("#res").html("OK");});
+$('#bp1').click(function(){$("#res").load("{pagedir}",{action:'add1trad'}, function(){window.location.reload()})});
+$('#bzp').click(function(){$("#res").load("{pagedir}",{action:'zaptrad'},  function(){window.location.reload()})});
+$('#brz').click(function(){$("#res").load("{pagedir}",{action:'resettrad'},function(){window.location.reload()})});
+$('.bmi').click(function(){
+	$("#res").load("{pagedir}",{action:'del1trad',trad:$(this).attr("id").replace(/bm/,"")},
+	function(){window.location.reload()})});
+
+$('.tradichg').change(function(){
+	$("#res").load("{pagedir}",{action:'updatetrad',
+		i:$(this).attr('id').replace(/trad[inout]*/,''),
+		key:$(this).attr('id').replace(/trad/,'').replace(/[0-9]*$/,''),
+		val:$(this).val()})});
+});
+
+$('#tradfile').click(function(){
+	$("#res").load("{pagedir}",{action:'trad'},
+	function(){window.location.reload()})});
+
+$('#savefile').click(function(){
+	$("#res").load("{pagedir}",{action:'save',page:$("#filouttxt").val()},
+	function(){window.location.reload()})});
+$('#checkfile').click(function(){
+	$("#res").load("{pagedir}",{action:'check',page:$("#filouttxt").val()},
+	function(){})});
+
+$('#cretrds').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
+$('#cretxts').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
+$('#chktxts').click(function(){
+    $.get("{pagedir}",{action:'chktrds'},function(texte){
+	wchk=window.open("chk")
+	wchk.document.open();
+	wchk.document.write(texte);
+	wchk.document.close();
+	});
+    });
+
+</script>
+

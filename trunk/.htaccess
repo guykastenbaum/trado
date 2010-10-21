@@ -1,0 +1,5 @@
+AuthUserFile /path/to/.htpasswd
+AuthGroupFile /dev/null
+AuthName "trado"
+AuthType Basic
+#remove-me! Require valid-user
