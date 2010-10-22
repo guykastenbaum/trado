@@ -103,7 +103,8 @@ $('#checkfile').click(function(){
 
 $('#cretrds').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
 $('#cretxts').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
-$('#chktxts').click(function(){window.open("chk","{pagedir}?action=chktrds")});
+$('#chktxts').click(function(){window.open("{pagedir}?action=chktrds","chk",
+    'scrollbars=yes,status=yes,width=200,height=400')});
 
 });
 </script>
