@@ -12,6 +12,13 @@ $conf_defs=array(
 		"pattern"=>$pattern_espcli,
 		),
     ),
+"isi:151"=>array(
+    "example"=>array(
+		"dirin"=>"web-source",
+		"dirout"=>"web-target",
+		"pattern"=>$pattern_espcli,
+		),
+    ),
 "www.realwebsite.com"=>array(
     "subdir1"=>array(
 		"dirin"=>"/var/www/site/somewhere1",
@@ -31,6 +38,6 @@ $conf_defs=array(
     ),
 );
 
-if (!$conf_defs[$_SERVER["HTTP_HOST"]]) die('conf['.$_SERVER["HTTP_HOST"].']');
+if (!$conf_defs[$_SERVER["HTTP_HOST"]]) die('Error, edit config.php with this entry "'.$_SERVER["HTTP_HOST"].'"');
 
 ?>

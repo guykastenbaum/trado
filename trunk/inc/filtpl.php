@@ -1,4 +1,4 @@
-<?
+<?php
 // FILNET GUY KASTENBAUM 10 NOVEMBRE 2005 , V1.0
 // 20 12 2006 ajout escape pour le cas ou les valeurs de tableau contiennent des {}
 // filtpl.php un template aussi bien que les autres
