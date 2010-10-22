@@ -87,8 +87,8 @@ $('.tradichg').change(function(){
 	$("#res").load("{pagedir}",{action:'updatetrad',
 		i:$(this).attr('id').replace(/trad[inout]*/,''),
 		key:$(this).attr('id').replace(/trad/,'').replace(/[0-9]*$/,''),
-		val:$(this).val()})});
-});
+		val:$(this).val()})
+	});
 
 $('#tradfile').click(function(){
 	$("#res").load("{pagedir}",{action:'trad'},
@@ -103,14 +103,8 @@ $('#checkfile').click(function(){
 
 $('#cretrds').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
 $('#cretxts').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
-$('#chktxts').click(function(){
-    $.get("{pagedir}",{action:'chktrds'},function(texte){
-	wchk=window.open("chk")
-	wchk.document.open();
-	wchk.document.write(texte);
-	wchk.document.close();
-	});
-    });
+$('#chktxts').click(function(){window.open("chk","{pagedir}?action=chktrds")});
 
+});
 </script>
 
