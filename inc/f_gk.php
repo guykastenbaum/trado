@@ -1,4 +1,4 @@
-<?
+<?php
 //fonctions utilitaires generiques gk
 function f_urldomclean($v_url) {
 	$v_url=preg_replace("|^http://|","",$v_url);
