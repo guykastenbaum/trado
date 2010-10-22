@@ -90,30 +90,18 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	function trado_replaceintext_ht($v_filtxt, $v_rech, $v_repl)
 	{
 		$txtout=$v_filtxt;
-		preg_match_all("/([^>]*>)([^<>]*)</s",$v_filtxt,$matches,PREG_OFFSET_CAPTURE);
-		foreach($matches[0] as $i=>$match)
-		{
-			$strtxt=$match[0];
-			$match[2]=preg_replace("/(<[^>]*>)([^<>]*)/","$1",$match[0]);
-			$match[3]=preg_replace("/(<[^>]*>)([^<>]*)/","$2",$match[0]);
-			$match[4]=strstr($match[3],$v_rech);
-			$match[5]=str_replace($v_rech,$v_repl,$match[3]);
-			//$filouttxt=str_replace($dif["in"],$dif["out"],$filouttxt);
-			$matches[0][$i]=$match;
-		}
+		preg_match_all("/([^>]*>)([^<>]*)</s",$v_filtxt,$matches,PREG_OFFSET_CAPTURE|PREG_SET_ORDER);
 		$ofs=0;
-		foreach($matches[0] as $i=>$match)
-		{
-			if ($match[4])
+		foreach($matches as $i=>$match)
+		{//0=<avant> //1:phrase //2:<apres
+			if (strstr($match[2][0],$v_rech))
 			{
-				$txtout=substr($txtout,0,$ofs+$match[1]).
-					$match[5].
-					substr($txtout,$ofs+$match[1]+strlen($match[3]));
-				$ofs+=strlen($match[5])-strlen($match[3]);
+				$replaced=str_replace($v_rech,$v_repl,$match[2][0]);
+				$txtout=substr($txtout,0,$match[2][1]+$ofs).$replaced.
+					substr($txtout,$match[2][1]+$ofs+strlen($match[2][0]));
+				$ofs+=strlen($replaced)-strlen($match[2][0]);
 			}
 		}
-		//print_r($matches[0]);die;
-		//$txtout.=print_r($match0,1);
 		return($txtout);
 	}
 	function trado_isrechdelim($v_rech, $v_repl)
