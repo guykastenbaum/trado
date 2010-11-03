@@ -30,20 +30,27 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		$filtxt=preg_replace("/`/","'",$filtxt);
 
 		$filtxt=preg_replace(":[°²]:","",$filtxt);
-
+		
+		//vire les scripts
 		$filtxt=preg_replace(":<script:is","°",$filtxt);
 		$filtxt=preg_replace(":</script>:is","²",$filtxt);
 		$filtxt=preg_replace(":°[^°]*²:is","",$filtxt);
 		$filtxt=preg_replace(":[²°]:is","",$filtxt);
 		//$filtxt=preg_replace(":<script.*</script>:is","",$filtxt);
 
+		//vire les commentaires
 		$filtxt=preg_replace(":<!--:is","°",$filtxt);
 		$filtxt=preg_replace(":-->:is","²",$filtxt);
 		$filtxt=preg_replace(":°[^°]*²:is","",$filtxt);
 		$filtxt=preg_replace(":[²°]:is","",$filtxt);
 
+		//extrait les alt et title
+		$filtxt=preg_replace(":(alt|title|value)=\"([^\"]*)\":is",">$2<",$filtxt);
+
+		//vire les balises
 		$filtxt=preg_replace("/<[^>]*>/","`",$filtxt);
 
+		//nettoie ce qui reste
 		$filtxt=preg_replace("/&nbsp;/"," ",$filtxt);
 		$filtxt=preg_replace("/[ \t\n\r]+/s"," ",$filtxt);
 		$filtxt=preg_replace("/`+ +/","`",$filtxt);
@@ -76,8 +83,20 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 			))
 				$tdif[]=array("in"=>$in,"out"=>$out);
 		}
+		$tdif=$this->trado_removeduplicates($tdif);
 		if (!$tdif) return(array($this->trado_defaulttrad()));
 		return($tdif);
+	}
+	function trado_removeduplicates($v_tdif)
+	{
+		$tdifk=array();
+		$tdif2=array();
+		foreach($v_tdif as $tdifi=>$tdif) 
+		    if (!$tdifk[$tdif["in"]]){
+			$tdifk[$tdif["in"]]=$tdifi;
+			$tdif2[]=$tdif;
+			}
+		return($tdif2);
 	}
 	function trado_removeglobdifs($v_tdif, $v_gdif, $v_only_if_same=false)
 	{
@@ -116,10 +135,12 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	}
 	function trado_replaceintext($v_filtxt, $v_rech, $v_repl)
 	{
-	if ($this->trado_isrechdelim($v_rech, $v_repl))
+	    if ($this->trado_isrechdelim($v_rech, $v_repl))
 		return(str_replace($v_rech, $v_repl,$v_filtxt));
-	else
-		return($this->trado_replaceintext_ht($v_filtxt, $v_rech, $v_repl));
+	    if (strpos($v_filtxt,'"'.$v_rech.'"'))
+		return(str_replace('"'.$v_rech.'"', '"'.$v_repl.'"',$v_filtxt));
+
+	    return($this->trado_replaceintext_ht($v_filtxt, $v_rech, $v_repl));
 	}
 	function trado_getfiles($v_dir,$v_filtre)
 	{
@@ -269,8 +290,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	}
 	function checkactutxt()
 	{
-		if (!is_dir(preg_replace(":/[^/]*$:","",$this->filout)))
-			mkdir(preg_replace(":/[^/]*$:","",$this->filout),0755,true);
+		if (!is_dir(preg_replace(":/[^/]*$:","",$this->filout))) return(null);
 		if (!file_exists($this->filout)) return(null);
 		if (!is_file($this->filout)) return(null);
 		$filactu=implode("",file($this->filout));
@@ -357,6 +377,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		return("OK - trad");
 	}
 	if ($v_action=="cretrds"){
+		set_time_limit(90);
 		$filelist=$this->filelist();
 		$savettrado=$this->ttrado;
 		$ttrado=$this->ttrado;
@@ -369,6 +390,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		return("OK - all tr created");
 	}
 	if ($v_action=="chktrds"){
+		set_time_limit(90);
 		$filelist=$this->filelist();
 		$savettrado=$this->ttrado;
 		$ttrado=$this->ttrado;
@@ -404,6 +426,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		");
 	}
 	if ($v_action=="cretxts"){
+		set_time_limit(90);
 		$filelist=$this->filelist();
 		$savettrado=$this->ttrado;
 		$ttrado=$this->ttrado;
