@@ -61,7 +61,7 @@ file : {menu_filin}
 <br/>
 <button id=cretrds>reset/create ALL translations</button>
 <button id=cretxts>translate ALL</button>
-<button id=chktxts>check ALL</button>
+<button id=chktrds>check ALL</button>
 <br/>
 <br/>
 <a href="?reload=1">reload configuration</a><br/>
@@ -102,8 +102,8 @@ $('#checkfile').click(function(){
 	function(){})});
 
 $('#cretrds').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
-$('#cretxts').click(function(){$("#res").load("{pagedir}",{action:'cretrds'})});
-$('#chktxts').click(function(){window.open("{pagedir}?action=chktrds","chk",
+$('#cretxts').click(function(){$("#res").load("{pagedir}",{action:'cretxts'})});
+$('#chktrds').click(function(){window.open("{pagedir}?action=chktrds","chk",
     'scrollbars=yes,status=yes,width=200,height=400')});
 
 });

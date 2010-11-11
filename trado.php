@@ -133,14 +133,26 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		if (!preg_match("/[\"\'\)\>\}\[]/",substr($r_rech,-1,1))) return false;
 		return true;
 	}
-	function trado_replaceintext($v_filtxt, $v_rech, $v_repl)
+	function trado_replaceintext_1($v_filtxt, $v_rech, $v_repl)
 	{
 	    if ($this->trado_isrechdelim($v_rech, $v_repl))
 		return(str_replace($v_rech, $v_repl,$v_filtxt));
 	    if (strpos($v_filtxt,'"'.$v_rech.'"'))
 		return(str_replace('"'.$v_rech.'"', '"'.$v_repl.'"',$v_filtxt));
-
 	    return($this->trado_replaceintext_ht($v_filtxt, $v_rech, $v_repl));
+	}
+	function trado_replaceintext($v_filtxt, $v_rech, $v_repl)
+	{
+	    $rech=html_entity_decode($v_rech);
+	    $repl=html_entity_decode($v_repl);
+
+	    $filtxt=$this->trado_replaceintext_1($v_filtxt, f_str2utf8($rech), f_str2iso($repl));
+	    if ($filtxt!=$v_filtxt) return($filtxt);
+	    $filtxt=$this->trado_replaceintext_1($v_filtxt, f_str2iso($rech), f_str2iso($repl));
+	    if ($filtxt!=$v_filtxt) return($filtxt);
+	    $filtxt=$this->trado_replaceintext_1($v_filtxt, htmlentities($rech), htmlentities($repl));
+	    if ($filtxt!=$v_filtxt) return($filtxt);
+	return($v_filtxt);
 	}
 	function trado_getfiles($v_dir,$v_filtre)
 	{
@@ -188,10 +200,25 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		return($ddd);
 	}
 
+	static function tdiflongerfirst($a, $b)
+	{
+	    return((strlen($a["in"])==strlen($b["in"]))?0:
+		((strlen($a["in"])<strlen($b["in"]))?1:-1));
+	}
 	function appliquetrad()
 	{
+		
+
 		$this->filouttxt=$this->filintxt;
-		foreach(array_merge($this->gdif,$this->tdif) as $dif)
+		//d'abord les tdif, dans un ordre de taille, ensuite globals
+		$tdiforder=$this->tdif;
+		usort($tdiforder, array("trado", "tdiflongerfirst"));
+		foreach($tdiforder as $dif)
+			$this->filouttxt=$this->trado_replaceintext(
+				$this->filouttxt, $dif["in"],$dif["out"]);
+		$tdiforder=$this->gdif;
+		usort($tdiforder, array("trado", "tdiflongerfirst"));
+		foreach($tdiforder as $dif)
 			$this->filouttxt=$this->trado_replaceintext(
 				$this->filouttxt, $dif["in"],$dif["out"]);
 		$this->savetxt();
@@ -285,8 +312,10 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		if (!is_dir(preg_replace(":/[^/]*$:","",$this->filout)))
 			mkdir(preg_replace(":/[^/]*$:","",$this->filout),0755,true);
 		$f=fopen($this->filout,"w");
-		fwrite($f,$this->filouttxt);
-		fclose($f);
+		if ($f){
+			fwrite($f,$this->filouttxt);
+			fclose($f);
+		}
 	}
 	function checkactutxt()
 	{
@@ -435,6 +464,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 			$ttrado["filin"]=$file;
 			$this->trado_init($ttrado);
 			$this->appliquetrad();
+			print ".";
 		}
 		$this->trado_init($savettrado);
 		return("OK - all tr applied");
