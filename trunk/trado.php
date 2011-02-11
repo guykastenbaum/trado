@@ -128,9 +128,12 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		$ofs=0;
 		foreach($matches as $i=>$match)
 		{//0=<avant> //1:phrase //2:<apres
-			if (strstr($match[2][0],$v_rech))
+			//compare sans " " ni \n, mais sans trim !
+			$txtpart=(preg_replace("/\s+/"," ",$match[2][0]));
+			$v_rech=(preg_replace("/\s+/"," ",$v_rech));
+		if (strstr($txtpart,$v_rech))
 			{
-				$replaced=str_replace($v_rech,$v_repl,$match[2][0]);
+				$replaced=str_replace($v_rech,$v_repl,$txtpart);
 				$txtout=substr($txtout,0,$match[2][1]+$ofs).$replaced.
 					substr($txtout,$match[2][1]+$ofs+strlen($match[2][0]));
 				$ofs+=strlen($replaced)-strlen($match[2][0]);
@@ -160,6 +163,8 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	{
 	    $rech=f_str2iso($v_rech);
 	    $repl=f_str2iso($v_repl);
+	    //$rech=str_replace("\\n","\n",str_replace("\\t","\t",$rech));
+	    //$repl=str_replace("\\n","\n",str_replace("\\t","\t",$repl));
 
 	    $filtxt=$this->trado_replaceintext_1($v_filtxt, $rech, $repl);
 	    if ($filtxt!=$v_filtxt) return($filtxt);
@@ -381,7 +386,7 @@ $_SESSION["trado"]=$cf[$v_conf];
 	{
 		$filactu=$this->getfilactu();
 		if (!$filactu) return(null);
-		if ($filactu==$this->filouttxt) return(true);//==
+		if ($filactu==$this->filouttxt) return(array());
 		$chkdif=$this->trado_creatediff($this->filouttxt, $filactu);
 		$chkdif=$this->difremoveeq($chkdif);
 		return($chkdif);//liste les diffs
