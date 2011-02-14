@@ -170,6 +170,8 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	    if ($filtxt!=$v_filtxt) return($filtxt);
 	    $filtxt=$this->trado_replaceintext_1($v_filtxt, htmlentities($rech), $repl);
 	    if ($filtxt!=$v_filtxt) return($filtxt);
+	    $filtxt=$this->trado_replaceintext_1($v_filtxt, html_entity_decode($rech), $repl);
+	    if ($filtxt!=$v_filtxt) return($filtxt);
 	    $filtxt=$this->trado_replaceintext_1($v_filtxt, f_str2utf8($rech), $repl);
 	    if ($filtxt!=$v_filtxt) return($filtxt);
 /*
