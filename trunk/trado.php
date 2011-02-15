@@ -76,7 +76,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 
 		return(explode("`",$filtxt));
 	}
-	function trado_creatediff($v_filintxt, $v_filouttxt)
+	function trado_creatediff($v_filintxt, $v_filouttxt, $v_previousdif=null)
 	{
 	/*
 		$filin="dir/".$v_ttrado["dirin"]."/".$v_ttrado["filin"];
@@ -99,6 +99,13 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 				$tdif[]=array("in"=>$in,"out"=>$out);
 		}
 		$tdif=$this->trado_removeduplicates($tdif);
+		if ($v_previousdif)//recup ancienne trad
+			foreach($v_previousdif as $prevdif)
+				foreach($tdif as $i=>$dif)
+					if ($dif["in"]==$prevdif["in"]){
+						$tdif[$i]["out"]=$prevdif["out"];
+						break;
+					}
 		if (!$tdif) return(array($this->trado_defaulttrad()));
 		return($tdif);
 	}
@@ -482,6 +489,11 @@ $_SESSION["trado"]=$cf[$v_conf];
 		$this->savetrad();
 		return("OK - reset");
 	}
+	if ($v_action=="rescantrad"){
+		$this->tdif=$this->trado_creatediff($this->filintxt,$this->filouttxt,$this->tdif);
+		$this->savetrad();
+		return("OK - reset");
+	}
 	if ($v_action=="trad"){
 		$this->appliquetrad();
 		return("OK - trad");
@@ -495,7 +507,7 @@ $_SESSION["trado"]=$cf[$v_conf];
 		{
 			$ttrado["filin"]=$file;
 			$this->trado_init($ttrado);
-			$this->tdif=$this->trado_creatediff($this->filintxt,$this->filouttxt);
+			$this->tdif=$this->trado_creatediff($this->filintxt,$this->filouttxt,$this->tdif);
 			$this->savetrad();
 		}
 		$this->trado_init($savettrado);
