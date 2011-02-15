@@ -40,7 +40,8 @@ file : {menu_filin}
 <button id=bok class=txed>OK</button>
 <button id=bp1>ADD+1</button>
 <button id=bzp>DELETE-ALL</button>
-<button id=brz>RESCAN-ALL</button>
+<button id=brs>RESCAN-ALL</button>
+<button id=brz>RESET-ALL</button>
 <button id=ful>FULLTEXT</button>
 <br/>
 <span id="res"></span>
@@ -87,6 +88,7 @@ $('#bok').click(savall);
 $('#bp1').click(function(){rlda('add1trad')});
 $('#bzp').click(function(){rldc('zaptrad')});
 $('#brz').click(function(){rldc('resettrad')});
+$('#brs').click(function(){rldc('rescantrad')});
 $('#ful').click(function(){rldc('file')});
 $('.bmi').click(function(){$("#res").load("{pagedir}",{action:'del1trad',trad:$(this).attr("id").replace(/bm/,"")},rld)});
 
