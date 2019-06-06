@@ -13,8 +13,7 @@
 .isfileout{width: 600px;}
 .isnotfilein{width: 400px;}
 .isnotfileout{width: 400px;}
-button.bmi{vertical-align:super;}
-button.bti{vertical-align:super;}
+/*button.bmi,button.bti,button.rteon{vertical-align:super;}*/
 </style>
 conf : {menu_config}
 dir. in  : <input id="dirin"   class="updatesession"  size="20" value="{dirin}"  /> 
@@ -33,7 +32,9 @@ file : {menu_filin}
 <div class="txedbox {isfileout}">
 <textarea id="tradout{i}" class="tfl tradichg {isfileout}" zstyle="height:{n_out}em" >{out_ht}</textarea>
 </div>
-<button class="bmi" id="bm{i}">-</button><br/>
+ <button class="rteon" id="bm{i}">H</button>
+ <button class="bmi" id="bm{i}">X</button>
+ <br/>
 </div>
 <!-- END trad -->
 <br style="clear:both" />
@@ -60,6 +61,7 @@ file : {menu_filin}
 </table>
 <br/>
 <br/>
+<button class="rteon">html</button>
 <button id=cretrds>reset/create ALL translations</button>
 <button id=cretxts>translate ALL</button>
 <button id=chktrds>check ALL</button>
@@ -68,17 +70,18 @@ file : {menu_filin}
 <a href="?reload=1">reload configuration</a><br/>
 <script>
 $(function(){
-
-function rld(){	window.location.reload();}
+function rld(){$("#res").append(' ...RELOADING...');setTimeout(function(){window.location.reload();},2000)};
 function rlda(action){$("#res").load("{pagedir}",{action:action}, rld);}
 function rldc(action){
 	if (!confirm('you will loose all your present data !!')) return(false);
 	rlda(action)
 }
-$('.txed .tradichg , #filintxt , #filouttxt').rte({
-	media_url: "./inc/lib_js/rte-light/",
-	content_css_url: "./inc/lib_js/rte-light/rte.css"});
-
+//$('.txed .tradichg , #filintxt , #filouttxt').rte({media_url: "./inc/lib_js/rte-light/",content_css_url: "./inc/lib_js/rte-light/rte.css"})
+//$('.txed .tradichg , #filintxt , #filouttxt').click(function(){
+$('.rteon').click(function(){
+		$(this).parent().find('textarea').rte(
+		 {media_url: "./inc/lib_js/rte-light/",content_css_url: "./inc/lib_js/rte-light/rte.css"})
+})
 $('.updatesession').change(function(){
 	$("#res").load("{pagedir}",{action:'updatesession',key:$(this).attr('id').replace(/menu_/,''),
 	val:$(this).val()},	rld)});

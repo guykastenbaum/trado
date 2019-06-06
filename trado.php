@@ -1,16 +1,19 @@
 <?php
-if ($argc)
+if ($_SERVER['argc'])
 {
-	$_SERVER["HTTP_HOST"]=$argv[1];
-	$_REQUEST["config"]=$argv[2];
-	$_REQUEST["action"]=$argv[3];
+	$_SERVER["HTTP_HOST"]=$_SERVER['argv'][1];//notused
+	$_REQUEST["config"]=$_SERVER['argv'][2];
+	$_REQUEST["action"]=$_SERVER['argv'][3];
 }
 
+
 include "includes.php";
+function f_str2input($v_str){ return f_str2utf8($v_str);}
+function f_str2output($v_str){ return f_str2utf8($v_str);}
 function f_htmlentities_with_code($v_str){
 	$s_htmlentities_with_code=$v_str;
-	$s_htmlentities_with_code=f_str2iso($s_htmlentities_with_code);
-	$s_htmlentities_with_code=htmlentities($s_htmlentities_with_code,ENT_NOQUOTES);
+	//$s_htmlentities_with_code=f_str2utf8($s_htmlentities_with_code);
+	$s_htmlentities_with_code=htmlentities($s_htmlentities_with_code,ENT_NOQUOTES,"UTF-8");
 	$s_htmlentities_with_code=str_replace("&gt;",">",$s_htmlentities_with_code);
 	$s_htmlentities_with_code=str_replace("&lt;","<",$s_htmlentities_with_code);
 	$s_htmlentities_with_code=preg_replace("/&amp;([A-Za-z]+;)/","&$1", $s_htmlentities_with_code);
@@ -56,14 +59,19 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		//vire les commentaires
 		$filtxt=preg_replace(":<!--:is","°",$filtxt);
 		$filtxt=preg_replace(":-->:is","²",$filtxt);
-		$filtxt=preg_replace(":°[^°]*²:is","",$filtxt);
-		$filtxt=preg_replace(":[²°]:is","",$filtxt);
+		$filtxt=preg_replace(":°[^°²]*²:is","`",$filtxt);
+		$filtxt=preg_replace(":[²°]:is","`",$filtxt);
+		$filtxt=preg_replace(":[²°]:is","`",$filtxt);
 
 		//extrait les alt et title
 		$filtxt=preg_replace(":(alt|title|value)=\"([^\"]*)\":is",">$2<",$filtxt);
 
 		//vire les balises
 		$filtxt=preg_replace("/<[^>]*>/","`",$filtxt);
+
+		//vire les {{angular}}
+		$filtxt=preg_replace("/\{\{[^\}]*\}\}/","`",$filtxt);
+		$filtxt=preg_replace("/{{[^}]*}}/","`",$filtxt);
 
 		//nettoie ce qui reste
 		$filtxt=preg_replace("/&nbsp;/"," ",$filtxt);
@@ -86,7 +94,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 		//print_r($fildiff);die;
 		$tdin=$this->trado_createtdf($v_filintxt);
 		$tdou=$this->trado_createtdf($v_filouttxt);
-		//print_r($tdou);print_r($tdin);gk;
+		//print_r($tdou);print_r($tdin);
 		$tdif=array();
 		foreach($tdin as $i=>$in)
 		{
@@ -131,21 +139,27 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	function trado_replaceintext_ht($v_filtxt, $v_rech, $v_repl)
 	{
 		$txtout=$v_filtxt;
+		if ((!$v_rech) or (!$v_repl)) return($txtout);
+		$v_rech=(preg_replace("/\s+/"," ",$v_rech));
 		preg_match_all("/([^>]*>)([^<>]*)</s",$v_filtxt,$matches,PREG_OFFSET_CAPTURE|PREG_SET_ORDER);
 		$ofs=0;
 		foreach($matches as $i=>$match)
 		{//0=<avant> //1:phrase //2:<apres
 			//compare sans " " ni \n, mais sans trim !
+//if (preg_match("/ocia/",$match[2][0])) {print_r($match);}
+//die("//0=<avant> //1:phrase //2:<apres");
 			$txtpart=(preg_replace("/\s+/"," ",$match[2][0]));
-			$v_rech=(preg_replace("/\s+/"," ",$v_rech));
+//print "strstr($txtpart,$v_rech)";
 		if (strstr($txtpart,$v_rech))
 			{
+//print "str_replace($v_rech,$v_repl,txtpart)";
 				$replaced=str_replace($v_rech,$v_repl,$txtpart);
 				$txtout=substr($txtout,0,$match[2][1]+$ofs).$replaced.
 					substr($txtout,$match[2][1]+$ofs+strlen($match[2][0]));
 				$ofs+=strlen($replaced)-strlen($match[2][0]);
 			}
 		}
+//die("strstr(txtpart,$v_rech)");
 		return($txtout);
 	}
 	function trado_isrechdelim($v_rech, $v_repl)
@@ -208,6 +222,8 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 			foreach($filtres as $filtre)
 				if (substr($filtre,0,1)=="!"){
 					if (preg_match($sep.substr($filtre,1).$sep,$fildir)) $exc++;
+					//if (preg_match($sep.substr($filtre,1).$sep,$fildir)) 
+					//print "$fildir excluded by $filtre ; ";
 				}else{
 					if (preg_match($sep.$filtre.$sep,$fildir)) $inc++;
 					//if (preg_match($sep.$filtre.$sep,$fildir)) 
@@ -217,7 +233,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 			if (is_dir($fildir))
 			{
 				if (!$exc)
-					$tdir=array_merge($tdir,$this->trado_getfiles($fildir,$v_filtre,$depth++));
+					$tdir=array_merge($tdir,$this->trado_getfiles($fildir,$v_filtre,$depth+1));
 			}
 			if (is_file($fildir))
 			{
@@ -225,6 +241,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 					$tdir[]=$fildir;
 			}
 		}
+		//print_r($tdir);print("$v_dir,$v_filtre,$depth");
 		return($tdir);
 	}
 
@@ -279,7 +296,7 @@ var $pattern;//"#!cache#!admin#!old#!tmp#\.htm$#\.html$#\.tpl#"
 	function trado_get($v_conf=null)
 	{
 	    global $conf_defs;
-	    $cf=$conf_defs[$_SERVER["HTTP_HOST"]];
+	    $cf=$conf_defs;
 	    
 	    $cfk=array_keys($cf);
 	    $cfk0=$cfk[0];
@@ -359,7 +376,6 @@ $_SESSION["trado"]=$cf[$v_conf];
 			$tdif=$this->trado_removeglobdifs($tdif, $gdif);
 			$this->savetrad();
 		}
-		//die($filcsv);
 		if (file_exists($filcsv)) $tdif=f_import_xls2tt($filcsv); else $tdif=array();
 		$this->tdif=$tdif;
 	}
@@ -507,7 +523,7 @@ $_SESSION["trado"]=$cf[$v_conf];
 		{
 			$ttrado["filin"]=$file;
 			$this->trado_init($ttrado);
-			$this->tdif=$this->trado_creatediff($this->filintxt,$this->filouttxt,$this->tdif);
+			$this->tdif=$this->trado_creatediff($this->filintxt,$this->filouttxt);
 			$this->savetrad();
 		}
 		$this->trado_init($savettrado);
@@ -565,12 +581,12 @@ $_SESSION["trado"]=$cf[$v_conf];
 		return("OK - all tr applied");
 	}
 	if ($v_action=="save"){
-		$this->filouttxt=f_str2iso($_REQUEST["page"]);
+		$this->filouttxt=f_str2output($_REQUEST["page"]);
 		$this->savetxt();
 		return("OK - saved");
 	}
 	if ($v_action=="check"){
-		$this->filouttxt=f_str2iso($_REQUEST["page"]);
+		$this->filouttxt=f_str2output($_REQUEST["page"]);
 		return($this->chktab2htm($this->checktrad())."OK - checked");
 	}
     }
@@ -595,7 +611,7 @@ $tt["menu_filin"]=f_sql2menu("menu_filin",
 	$ot->ttrado["filin"],
 	$ot->filelist(),"class='updatesession'");
 $mnuconf=array();
-foreach($conf_defs[$_SERVER["HTTP_HOST"]] as $cf=>$tcf)
+foreach($conf_defs as $cf=>$tcf)
 	$mnuconf[$cf]=$cf;
 $tt["menu_config"]=f_sql2menu("menu_config",$ot->ttrado["conftrado"],$mnuconf,"class='updateconfig'");
 
@@ -605,10 +621,10 @@ if ($ot->ttrado["filin"])
 	foreach($tt["trad"] as $i=>$v) {
 		$istfile=($v["in"]=="FILE");
 		$tt["trad"][$i]["i"]=$i;
-		$tt["trad"][$i]["in_h"]=($v["in"]);
-		$tt["trad"][$i]["out_h"]=($v["out"]);
-		$tt["trad"][$i]["in_ht"]=htmlentities($v["in"]);
-		$tt["trad"][$i]["out_ht"]=htmlentities($v["out"]);
+		$tt["trad"][$i]["in_h"]=f_str2output($v["in"]);
+		$tt["trad"][$i]["out_h"]=f_str2output($v["out"]);
+		$tt["trad"][$i]["in_ht"]=htmlentities(f_str2output($v["in"]));
+		$tt["trad"][$i]["out_ht"]=htmlentities(f_str2output($v["out"]));
 		$tt["trad"][$i]["n_in"]=count(explode("\n",$v["in"]))+(strlen($v["in"])/50);
 		$tt["trad"][$i]["n_out"]=count(explode("\n",$v["out"]))+(strlen($v["out"])/(($istfile)?120:50));
 		$tt["trad"][$i]["pix_in"]=10*$tt["trad"][$i]["n_in"];
@@ -619,10 +635,10 @@ if ($ot->ttrado["filin"])
 	$tt["filtrad"]=$ot->filcsv;
 	$tt["filin"]=$ot->ttrado["filin"];
 	$tt["filout"]=$ot->filout;
-	$tt["filintxt"]=$ot->filintxt;
-	$tt["filouttxt"]=$ot->filouttxt;
-	$tt["filintxt_h"]=htmlentities($ot->filintxt);
-	$tt["filouttxt_h"]=htmlentities($ot->filouttxt);
+	$tt["filintxt"]=f_str2input($ot->filintxt);
+	$tt["filouttxt"]=f_str2output($ot->filouttxt);
+	$tt["filintxt_h"]=htmlentities(f_str2output($ot->filintxt));
+	$tt["filouttxt_h"]=htmlentities(f_str2output($ot->filouttxt));
 	$tt["filinphp"]=preg_replace("/\.html*$/",".php",$ot->ttrado["filin"]);
 	$tt["filoutphp"]=preg_replace("/\.html*$/",".php",$ot->filout);
 }
